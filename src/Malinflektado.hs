@@ -51,3 +51,26 @@ legiFinaĵon = Legilo f where
          rezulto = find (\(finaĵo, _, _) -> finaĵo `isSuffixOf` vorto) finaĵojKajĴustajSekvaĵoj
       in
       fmap (\(f, i, vt) -> ((i, vt), take (length vorto - length f) vorto)) rezulto
+
+kontroliFinaĵon :: (Monad m, Alternative m) => Bool -> m ()
+kontroliFinaĵon True = return ()
+kontroliFinaĵon False = empty
+
+legiSekvanFinaĵon :: Vorttipo -> Legilo [(Inflekcio, Vorttipo)]
+legiSekvanFinaĵon vorttipo = do
+   (inflekcio, sekvaVorttipo) <- legiFinaĵon
+   kontroliFinaĵon (sekvaVorttipo == vorttipo)
+   restanta <- legiĈiujnFinaĵojn sekvaVorttipo
+   return $ (inflekcio, sekvaVorttipo) : restanta
+
+legiĈiujnFinaĵojn :: Vorttipo -> Legilo [(Inflekcio, Vorttipo)]
+legiĈiujnFinaĵojn = unuAŭNenio . legiSekvanFinaĵon
+
+unuAŭNenio :: Legilo [a] -> Legilo [a]
+unuAŭNenio l = l <|> return []
+
+malinflekti :: Legilo [(Inflekcio, Vorttipo)]
+malinflekti = do
+   (i, s) <- legiFinaĵon
+   restanta <- legiĈiujnFinaĵojn s
+   return $ (i, s) : restanta

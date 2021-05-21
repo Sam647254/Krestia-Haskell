@@ -7,13 +7,13 @@ module Vorttipo
 data Vorttipo
    = Verbo1
    | Verbo12
-   deriving Show
+   deriving (Show, Eq)
 
 data Inflekcio
    = Progresivo
    | Perfekto
    | Komenco
-   deriving Show
+   deriving (Show, Eq)
 
 type Finaĵo = String
 
@@ -22,4 +22,5 @@ finaĵojKajĴustajSekvaĵoj =
    [ ("ro", Perfekto, Verbo12)
    , ("o", Perfekto, Verbo1)
    , ("elit", Komenco, Verbo12)
+   , ("elis", Komenco, Verbo1)
    ]
