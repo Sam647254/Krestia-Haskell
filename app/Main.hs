@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import Malinflektado
 
 main :: IO ()
-main = someFunc
+main = putStrLn ""
