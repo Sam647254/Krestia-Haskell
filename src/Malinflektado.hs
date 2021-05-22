@@ -1,5 +1,6 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE LambdaCase #-}
 module Malinflektado where
 
 -- many legiFinaĵon <|> legiBazanVorton
@@ -17,6 +18,13 @@ newtype Legilo a = Legilo (String -> Maybe (a, String))
 data MalinflektaŜtupo
    = NebazaŜtupo (Inflekcio, [Vorttipo])
    | BazaŜtupo Vorttipo
+   deriving Show
+
+data MalinflektitaVorto = MalinflektitaVorto
+   { ŝtupoj :: [Inflekcio]
+   , bazaTipo :: Vorttipo
+   , bazaVorto :: String
+   }
    deriving Show
 
 apliki :: Legilo a -> String -> Maybe (a, String)
@@ -57,7 +65,7 @@ legiFinaĵon = Legilo f where
          let restanta = take (length vorto - length f) vorto in
          case uzasPEsti i of
             Just pi -> do
-               (restantaj, _) <- malinflekti restanta
+               (restantaj, _) <- malinflekti_ restanta
                case restantaj of
                   (NebazaŜtupo (n, _) : _) ->
                      if n == PredikativaEsti then
@@ -102,8 +110,24 @@ tuteMalinflekti vorto pravajVorttipoj = do
          guard (v `elem` pravajVorttipoj || pravajVorttipoj == [Ĉio])
          return ([sekvaŜtupo], restanta)
 
-malinflekti :: String -> Maybe ([MalinflektaŜtupo], String)
-malinflekti = (`tuteMalinflekti` [Ĉio])
+malinflekti_ :: String -> Maybe ([MalinflektaŜtupo], String)
+malinflekti_ = (`tuteMalinflekti` [Ĉio])
+
+malinflekti :: String -> Maybe MalinflektitaVorto
+malinflekti vorto =
+   tuteMalinflekti vorto [Ĉio]
+   & fmap (\(ŝtupoj, bazaVorto) ->
+      let
+         inflekcioj =
+            init ŝtupoj
+            & fmap (\case
+               NebazaŜtupo (i, _) -> i
+               _ -> undefined)
+         bazaŜtupo = case last ŝtupoj of
+            BazaŜtupo vt -> vt
+            _ -> undefined
+      in
+      MalinflektitaVorto {ŝtupoj=inflekcioj, bazaTipo=bazaŜtupo, bazaVorto=bazaVorto})
 
 kontroliŜtupojn :: [MalinflektaŜtupo] -> Maybe [MalinflektaŜtupo]
 kontroliŜtupojn ŝtupoj =
