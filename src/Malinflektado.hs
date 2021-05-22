@@ -15,7 +15,7 @@ import Control.Arrow
 newtype Legilo a = Legilo (String -> Maybe (a, String))
 
 data MalinflektaŜtupo
-   = NebazaŜtupo (Inflekcio, Vorttipo)
+   = NebazaŜtupo (Inflekcio, [Vorttipo])
    | BazaŜtupo Vorttipo
    deriving Show
 
@@ -53,7 +53,19 @@ legiFinaĵon = Legilo f where
    f :: String -> Maybe (MalinflektaŜtupo, String)
    f [] = Nothing
    f vorto = (find (\(finaĵo, _, _) -> finaĵo `isSuffixOf` vorto) finaĵojKajĴustajSekvaĵoj
-      & fmap (\(f, i, vt) -> (NebazaŜtupo (i, vt), take (length vorto - length f) vorto)))
+      & (>>= (\(f, i, vt) ->
+         let restanta = take (length vorto - length f) vorto in
+         case uzasPEsti i of
+            Just pi -> do
+               (restantaj, _) <- malinflekti restanta
+               case restantaj of
+                  (NebazaŜtupo (n, _) : _) ->
+                     if n == PredikativaEsti then
+                        Just (NebazaŜtupo (pi, vt), restanta)
+                     else
+                        Nothing
+                  _ -> Nothing
+            Nothing -> Just (NebazaŜtupo (i, vt), restanta))))
       <|> apliki legiBazanVorton vorto
 
 legiBazanVorton :: Legilo MalinflektaŜtupo
@@ -66,8 +78,8 @@ legiLastanŜtupon = do
    b <- legiBazanVorton
    return [b]
 
-tuteMalinflekti :: String -> Vorttipo -> Maybe ([MalinflektaŜtupo], String)
-tuteMalinflekti vorto pravaVorttipo = do
+tuteMalinflekti :: String -> [Vorttipo] -> Maybe ([MalinflektaŜtupo], String)
+tuteMalinflekti vorto pravajVorttipoj = do
    (sekvaŜtupo, restanta) <- apliki legiFinaĵon vorto
    case sekvaŜtupo of
       NebazaŜtupo (_, s) -> do
@@ -80,18 +92,18 @@ tuteMalinflekti vorto pravaVorttipo = do
                   (baza, lasta) <- apliki legiBazanVorton vorto
                   return ([baza], lasta)
             (BazaŜtupo vt : _) ->
-               if vt == s then
+               if vt `elem` s then
                   return (sekvaŜtupo : restantaj, lasta)
                else do
                   (baza, lasta) <- apliki legiBazanVorton vorto
                   return ([baza], lasta)
             _ -> undefined
       BazaŜtupo v -> do
-         guard (v == pravaVorttipo || pravaVorttipo == Ĉio)
+         guard (v `elem` pravajVorttipoj || pravajVorttipoj == [Ĉio])
          return ([sekvaŜtupo], restanta)
 
 malinflekti :: String -> Maybe ([MalinflektaŜtupo], String)
-malinflekti vorto = tuteMalinflekti vorto Ĉio
+malinflekti = (`tuteMalinflekti` [Ĉio])
 
 kontroliŜtupojn :: [MalinflektaŜtupo] -> Maybe [MalinflektaŜtupo]
 kontroliŜtupojn ŝtupoj =
