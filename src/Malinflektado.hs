@@ -10,8 +10,14 @@ import Vorttipo
 import Data.Function
 import Data.Maybe
 import Control.Applicative
+import Control.Arrow
 
 newtype Legilo a = Legilo (String -> Maybe (a, String))
+
+data MalinflektaŜtupo
+   = NebazaŜtupo (Inflekcio, Vorttipo)
+   | BazaŜtupo Vorttipo
+   deriving Show
 
 apliki :: Legilo a -> String -> Maybe (a, String)
 apliki (Legilo legilo) = legilo
@@ -42,35 +48,53 @@ instance Monad Legilo where
       (valuo2, restanta2) <- apliki (legiloF valuo) restanta
       return (valuo2, restanta2))
 
-legiFinaĵon :: Legilo (Inflekcio, Vorttipo)
+legiFinaĵon :: Legilo MalinflektaŜtupo
 legiFinaĵon = Legilo f where
-   f :: String -> Maybe ((Inflekcio, Vorttipo), String)
+   f :: String -> Maybe (MalinflektaŜtupo, String)
    f [] = Nothing
-   f vorto =
-      let
-         rezulto = find (\(finaĵo, _, _) -> finaĵo `isSuffixOf` vorto) finaĵojKajĴustajSekvaĵoj
-      in
-      fmap (\(f, i, vt) -> ((i, vt), take (length vorto - length f) vorto)) rezulto
+   f vorto = (find (\(finaĵo, _, _) -> finaĵo `isSuffixOf` vorto) finaĵojKajĴustajSekvaĵoj
+      & fmap (\(f, i, vt) -> (NebazaŜtupo (i, vt), take (length vorto - length f) vorto)))
+      <|> apliki legiBazanVorton vorto
 
-kontroliFinaĵon :: (Monad m, Alternative m) => Bool -> m ()
-kontroliFinaĵon True = return ()
-kontroliFinaĵon False = empty
+legiBazanVorton :: Legilo MalinflektaŜtupo
+legiBazanVorton = Legilo f where
+   f [] = Nothing
+   f vorto = bazaFinaĵoDe vorto & fmap (\v -> (BazaŜtupo v, vorto))
 
-legiSekvanFinaĵon :: Vorttipo -> Legilo [(Inflekcio, Vorttipo)]
-legiSekvanFinaĵon vorttipo = do
-   (inflekcio, sekvaVorttipo) <- legiFinaĵon
-   kontroliFinaĵon (sekvaVorttipo == vorttipo)
-   restanta <- legiĈiujnFinaĵojn sekvaVorttipo
-   return $ (inflekcio, sekvaVorttipo) : restanta
+legiLastanŜtupon :: Legilo [MalinflektaŜtupo]
+legiLastanŜtupon = do
+   b <- legiBazanVorton
+   return [b]
 
-legiĈiujnFinaĵojn :: Vorttipo -> Legilo [(Inflekcio, Vorttipo)]
-legiĈiujnFinaĵojn = unuAŭNenio . legiSekvanFinaĵon
+tuteMalinflekti :: String -> Vorttipo -> Maybe ([MalinflektaŜtupo], String)
+tuteMalinflekti vorto pravaVorttipo = do
+   (sekvaŜtupo, restanta) <- apliki legiFinaĵon vorto
+   case sekvaŜtupo of
+      NebazaŜtupo (_, s) -> do
+         (restantaj, lasta) <- tuteMalinflekti restanta s <|> apliki legiLastanŜtupon restanta
+         case restantaj of
+            (NebazaŜtupo (_, vt) : _) ->
+               if vt == s then
+                  return (sekvaŜtupo : restantaj, lasta)
+               else do
+                  (baza, lasta) <- apliki legiBazanVorton vorto
+                  return ([baza], lasta)
+            (BazaŜtupo vt : _) ->
+               if vt == s then
+                  return (sekvaŜtupo : restantaj, lasta)
+               else do
+                  (baza, lasta) <- apliki legiBazanVorton vorto
+                  return ([baza], lasta)
+            _ -> undefined
+      BazaŜtupo v -> do
+         guard (v == pravaVorttipo || pravaVorttipo == Ĉio)
+         return ([sekvaŜtupo], restanta)
 
-unuAŭNenio :: Legilo [a] -> Legilo [a]
-unuAŭNenio l = l <|> return []
+malinflekti :: String -> Maybe ([MalinflektaŜtupo], String)
+malinflekti vorto = tuteMalinflekti vorto Ĉio
 
-malinflekti :: Legilo [(Inflekcio, Vorttipo)]
-malinflekti = do
-   (i, s) <- legiFinaĵon
-   restanta <- legiĈiujnFinaĵojn s
-   return $ (i, s) : restanta
+kontroliŜtupojn :: [MalinflektaŜtupo] -> Maybe [MalinflektaŜtupo]
+kontroliŜtupojn ŝtupoj =
+   case last ŝtupoj of
+      BazaŜtupo _ -> Just ŝtupoj
+      _ -> Nothing

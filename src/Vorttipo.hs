@@ -1,12 +1,9 @@
-module Vorttipo
-   ( Vorttipo(..)
-   , Inflekcio(..)
-   , finaĵojKajĴustajSekvaĵoj
-   ) where
+module Vorttipo where
 
 data Vorttipo
    = Verbo1
    | Verbo12
+   | Ĉio
    deriving (Show, Eq)
 
 data Inflekcio
@@ -24,3 +21,9 @@ finaĵojKajĴustajSekvaĵoj =
    , ("elit", Komenco, Verbo12)
    , ("elis", Komenco, Verbo1)
    ]
+
+bazaFinaĵoDe :: String -> Maybe Vorttipo
+bazaFinaĵoDe vorto =
+   case reverse vorto of
+      ('s' : _) -> Just Verbo1
+      ('t' : _) -> Just Verbo12
