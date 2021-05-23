@@ -7,11 +7,13 @@ module Malinflektado where
 
 import Control.Monad
 import Data.List
+import qualified Data.Text as T
 import Vorttipo
 import Data.Function
 import Data.Maybe
 import Control.Applicative
 import Control.Arrow
+import Fonotaktiko
 
 newtype Legilo a = Legilo (String -> Maybe (a, String))
 
@@ -25,7 +27,7 @@ data MalinflektitaVorto = MalinflektitaVorto
    , bazaTipo :: Vorttipo
    , bazaVorto :: String
    }
-   deriving Show
+   deriving (Show, Eq)
 
 apliki :: Legilo a -> String -> Maybe (a, String)
 apliki (Legilo legilo) = legilo
@@ -79,7 +81,9 @@ legiFinaĵon = Legilo f where
 legiBazanVorton :: Legilo MalinflektaŜtupo
 legiBazanVorton = Legilo f where
    f [] = Nothing
-   f vorto = bazaFinaĵoDe vorto & fmap (\v -> (BazaŜtupo v, vorto))
+   f vorto = bazaFinaĵoDe vorto
+      & (>>= (\v -> if ĉuValidaVorto (kategorigi vorto) then Just v else Nothing))
+      & fmap (\v -> (BazaŜtupo v, vorto))
 
 legiLastanŜtupon :: Legilo [MalinflektaŜtupo]
 legiLastanŜtupon = do
@@ -91,10 +95,13 @@ tuteMalinflekti vorto pravajVorttipoj = do
    (sekvaŜtupo, restanta) <- apliki legiFinaĵon vorto
    case sekvaŜtupo of
       NebazaŜtupo (_, s) -> do
-         (restantaj, lasta) <- tuteMalinflekti restanta s <|> apliki legiLastanŜtupon restanta
+         (restantaj, lasta) <-
+            tuteMalinflekti restanta s
+            <|> apliki legiLastanŜtupon restanta
+            <|> apliki legiLastanŜtupon vorto
          case restantaj of
             (NebazaŜtupo (_, vt) : _) ->
-               if vt == s then
+               if (not . null) (vt `intersect` s) then
                   return (sekvaŜtupo : restantaj, lasta)
                else do
                   (baza, lasta) <- apliki legiBazanVorton vorto
@@ -123,14 +130,9 @@ malinflekti vorto =
             & fmap (\case
                NebazaŜtupo (i, _) -> i
                _ -> undefined)
+            & reverse
          bazaŜtupo = case last ŝtupoj of
             BazaŜtupo vt -> vt
             _ -> undefined
       in
       MalinflektitaVorto {ŝtupoj=inflekcioj, bazaTipo=bazaŜtupo, bazaVorto=bazaVorto})
-
-kontroliŜtupojn :: [MalinflektaŜtupo] -> Maybe [MalinflektaŜtupo]
-kontroliŜtupojn ŝtupoj =
-   case last ŝtupoj of
-      BazaŜtupo _ -> Just ŝtupoj
-      _ -> Nothing
