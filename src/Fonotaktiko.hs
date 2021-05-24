@@ -28,13 +28,16 @@ kAŭV k = Konsonanto k
 kategorigi :: String -> [Litero]
 kategorigi = map kAŭV
 
-ĉuValidaVorto :: [Litero] -> Bool
-ĉuValidaVorto vorto =
+ĉuValidaVorto :: Bool -> [Litero] -> Bool
+ĉuValidaVorto komenco vorto =
    case vorto of
-      [Vokalo _] -> True
-      [Vokalo _, Konsonanto _] -> True
-      [Konsonanto _, Vokalo _] -> True
+      [] -> not komenco
+      [Konsonanto _, Vokalo _] -> not komenco
       [Konsonanto _, Vokalo _, Konsonanto _] -> True
-      Vokalo _ : Konsonanto k : restanta ->
-         ĉuValidaVorto (Konsonanto k: restanta)
+      [Vokalo _, Konsonanto _, Vokalo _] -> komenco
+      (Vokalo _ : restantaj) -> ĉuValidaVorto False restantaj
+      (Konsonanto _ : Konsonanto _ : Vokalo _ : restantaj) ->
+         ĉuValidaVorto False restantaj
+      (Konsonanto _ : Vokalo _ : restantaj) ->
+         ĉuValidaVorto False restantaj
       _ -> False
