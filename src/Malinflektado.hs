@@ -82,7 +82,7 @@ legiBazanVorton :: Legilo MalinflektaŜtupo
 legiBazanVorton = Legilo f where
    f [] = Nothing
    f vorto = bazaFinaĵoDe vorto
-      & (>>= (\v -> if ĉuValidaVorto True (kategorigi vorto) then Just v else Nothing))
+      & (>>= (\v -> if ĉuValidaVorto vorto then Just v else Nothing))
       & fmap (\v -> (BazaŜtupo v, vorto))
 
 legiLastanŜtupon :: Legilo [MalinflektaŜtupo]

@@ -9,6 +9,6 @@ spec :: Spec
 spec = do
    describe "Fonotaktiko" do
       it "can read valid base words" do
-         map (normaligi >>> kategorigi >>> ĉuValidaVorto True)
+         map ĉuValidaVorto
             ["Marika", "Runa", "Rejna", "Nivo", "Rini", "Silika", "Evra"]
             `shouldSatisfy` and
