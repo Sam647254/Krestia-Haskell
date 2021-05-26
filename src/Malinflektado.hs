@@ -62,21 +62,30 @@ legiFinaĵon :: Legilo MalinflektaŜtupo
 legiFinaĵon = Legilo f where
    f :: String -> Maybe (MalinflektaŜtupo, String)
    f [] = Nothing
-   f vorto = (find (\(finaĵo, _, _) -> finaĵo `isSuffixOf` vorto) finaĵojKajĴustajSekvaĵoj
-      & (>>= (\(f, i, vt) ->
-         let restanta = take (length vorto - length f) vorto in
-         case uzasPEsti i of
-            Just pi -> do
-               (restantaj, _) <- malinflekti_ restanta
-               case restantaj of
-                  (NebazaŜtupo (n, _) : _) ->
-                     if n == PredikativaEsti then
-                        Just (NebazaŜtupo (pi, vt), restanta)
-                     else
-                        Nothing
-                  _ -> Nothing
-            Nothing -> Just (NebazaŜtupo (i, vt), restanta))))
+   f vorto = (do
+      (f, i, vt) <- find (\(finaĵo, _, _) -> finaĵo `isSuffixOf` vorto) finaĵojKajĴustajSekvaĵoj
+      let restanta = take (length vorto - length f) vorto
+      case uzasPEsti i of
+         Just pi -> do
+            (restantaj, _) <- malinflekti_ restanta
+            case restantaj of
+               (NebazaŜtupo (n, _) : _) ->
+                  if n == PEsti then
+                     Just (NebazaŜtupo (pi, vt), pAlD restanta)
+                  else
+                     Just (NebazaŜtupo (i, vt), restanta)
+               _ -> Just (NebazaŜtupo (i, vt), restanta)
+         Nothing -> Just (NebazaŜtupo (i, vt), restanta))
+      <|> apliki legiPEsti vorto
       <|> apliki legiBazanVorton vorto
+
+legiPEsti :: Legilo MalinflektaŜtupo
+legiPEsti = Legilo f where
+   f [] = Nothing
+   f vorto = do
+      (vorttipo, _) <-
+         find (\(tipo, finaĵoj) -> any (`isSuffixOf` vorto) finaĵoj) finaĵojDePEsti
+      return (NebazaŜtupo (PEsti, [vorttipo]), pAlD vorto)
 
 legiBazanVorton :: Legilo MalinflektaŜtupo
 legiBazanVorton = Legilo f where

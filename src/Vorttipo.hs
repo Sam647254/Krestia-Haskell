@@ -2,6 +2,7 @@ module Vorttipo where
 
 import Data.List
 import Data.Function
+import qualified Data.Map.Strict as Map
 import Control.Applicative
 data Vorttipo
    = SubstantivoN
@@ -11,26 +12,28 @@ data Vorttipo
    | Verbo13
    | Verbo123
    | Ĉio
-   deriving (Show, Eq)
+   deriving (Show, Eq, Ord)
 
 data Inflekcio
    = Difinito
-   | PredikativaEsti
-   | AtributivaEstiA
-   | AtributivaEstiMA
+   | PEsti
+   | AEstiA
+   | AEstiMA
    | Ĝerundo
    | ĜerundoS
    | Progresivo
    | Perfekto
    | Komenco
+   | Antaŭigita
    deriving (Show, Eq)
 
 type Finaĵo = String
 
 finaĵojKajĴustajSekvaĵoj :: [(Finaĵo, Inflekcio, [Vorttipo])]
 finaĵojKajĴustajSekvaĵoj =
-   [ ("va", AtributivaEstiA, [SubstantivoN, SubstantivoNN])
-   , ("ga", AtributivaEstiMA, [SubstantivoN, SubstantivoNN])
+   [ ("va", AEstiA, [SubstantivoN, SubstantivoNN])
+   , ("ga", AEstiMA, [SubstantivoN, SubstantivoNN])
+   , ("vra", ĜerundoS, [SubstantivoN, SubstantivoNN])
    , ("ro", Perfekto, [Verbo12, Verbo123])
    , ("o", Perfekto, [Verbo1, Verbo13])
    , ("elit", Komenco, [Verbo12])
@@ -52,6 +55,12 @@ finaĵojDeSubstantivoN =
    , "ki"
    ]
 
+finaĵojDePEsti :: [(Vorttipo, [String])]
+finaĵojDePEsti =
+   [ (SubstantivoN, ["paa", "po", "pu", "taa", "to", "tu", "kaa", "ko", "ku"])
+   , (SubstantivoNN, ["maa", "mo", "mu", "naa", "no", "nu"])
+   ]
+
 finaĵojDeSubstantivoNN :: [String]
 finaĵojDeSubstantivoNN =
    [ "ma"
@@ -61,6 +70,13 @@ finaĵojDeSubstantivoNN =
    , "ne"
    , "ni"
    ]
+
+pAlD substantivo =
+   case reverse substantivo of
+      ('a' : 'a' : r) -> reverse ('a' : r)
+      ('o' : r) -> reverse ('e' : r)
+      ('u' : r) -> reverse ('i' : r)
+      _ -> undefined
 
 bazaFinaĵoDe :: String -> Maybe Vorttipo
 bazaFinaĵoDe vorto =
@@ -80,7 +96,7 @@ semblas (Komenco, verbo) celaVerbo = verbo == celaVerbo && ĉuVerbo verbo
 semblas _ _ = False
 
 uzasPEsti :: Inflekcio -> Maybe Inflekcio
-uzasPEsti Ĝerundo = Just ĜerundoS
+uzasPEsti ĜerundoS = Just Ĝerundo
 uzasPEsti _ = Nothing
 
 ĉuVerbo vorttipo =

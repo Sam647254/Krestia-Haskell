@@ -33,6 +33,7 @@ library
       src
   build-depends:
       base >=4.7 && <5
+    , containers
     , text
   default-language: Haskell2010
 
@@ -45,6 +46,7 @@ executable krestia-haskell-exe
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , containers
     , krestia-haskell
     , text
   default-language: Haskell2010
@@ -61,6 +63,7 @@ test-suite krestia-haskell-test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , containers
     , hspec
     , krestia-haskell
     , text
