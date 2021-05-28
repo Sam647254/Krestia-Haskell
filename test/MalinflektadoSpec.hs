@@ -10,9 +10,9 @@ testiBazanVorton vorto vorttipo = do
    malinflekti vorto `shouldBe`
       Just (MalinflektitaVorto {ŝtupoj=[], bazaTipo=vorttipo, bazaVorto=vorto})
 
-testiPEsti vorto vorttipo = do
+testiInflekcion inflekcio vorto bazaVorto vorttipo = do
    malinflekti vorto `shouldBe`
-      Just (MalinflektitaVorto {ŝtupoj=[PEsti], bazaTipo=vorttipo, bazaVorto=pAlD vorto})
+      Just (MalinflektitaVorto {ŝtupoj=[inflekcio], bazaTipo=vorttipo, bazaVorto=bazaVorto})
 
 spec :: Spec
 spec = do
@@ -28,7 +28,19 @@ spec = do
          testiBazanVorton "bep" Verbo123
          testiBazanVorton "pelip" Verbo123
    
-   describe "PEsti" do
+   describe "Substantivoj" do
       it "povas legi PEsti" do
-         testiPEsti "vilkaa" SubstantivoN
-         testiPEsti "kunaa" SubstantivoNN
+         testiInflekcion PEsti "vilkaa" "vilka" SubstantivoN
+         testiInflekcion PEsti "kunaa" "kuna" SubstantivoNN
+
+      it "povas legi Kvalito" do
+         testiInflekcion Kvalito "litelkaare" "litelka" SubstantivoN
+         testiInflekcion Kvalito "gremure" "gremi" SubstantivoNN
+      
+      it "povas legi Sola" do
+         testiInflekcion Sola "pospira" "pospi" SubstantivoN
+         testiInflekcion Sola "rimara" "rima" SubstantivoNN
+      
+      it "povas legi AEsti" do
+         testiInflekcion AEstiA "tatreteva" "tatrete" SubstantivoN
+         testiInflekcion AEstiA "kunava" "kuna" SubstantivoNN

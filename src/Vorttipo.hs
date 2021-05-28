@@ -7,24 +7,60 @@ import Control.Applicative
 data Vorttipo
    = SubstantivoN
    | SubstantivoNN
+   | KunigaSubstantivoN
+   | KunigaSubstantivoNN
+   | Rekordo
    | Verbo1
    | Verbo12
    | Verbo13
    | Verbo123
+   | Verbo2
+   | Verbo23
+   | Verbo3
+   | Verbo0
+   | Lokokupilo
+   | Modifanto
+   | FremdaVorto
+   | Cifero
    | Ĉio
-   deriving (Show, Eq, Ord)
+   deriving (Show, Eq)
 
 data Inflekcio
    = Difinito
+   | Havaĵo
    | PEsti
    | AEstiA
    | AEstiMA
    | Ĝerundo
    | ĜerundoS
+   | Havado
+   | Ekzistado
+   | Translativo
+   | Apartigita
+   | Sola
    | Progresivo
    | Perfekto
+   | Intenco
+   | Hipotezo
+   | Desiderativo
+   | Imperativo
+   | Hortativo
+   | Optativo
+   | Argumento1
+   | Argumento2
+   | Argumento3
+   | Parto1
+   | Parto2
+   | Parto3
+   | Unue2
+   | Unue3
    | Komenco
+   | Reflekcio
    | Antaŭigita
+   | Kvalito
+   | SolaFormo
+   | FremdaVortoI
+   | CiferoI
    deriving (Show, Eq)
 
 type Finaĵo = String
@@ -34,6 +70,8 @@ finaĵojKajĴustajSekvaĵoj =
    [ ("va", AEstiA, [SubstantivoN, SubstantivoNN])
    , ("ga", AEstiMA, [SubstantivoN, SubstantivoNN])
    , ("vra", ĜerundoS, [SubstantivoN, SubstantivoNN])
+   , ("re", Kvalito, [SubstantivoN, SubstantivoNN])
+   , ("ra", Sola, [SubstantivoN, SubstantivoNN])
    , ("ro", Perfekto, [Verbo12, Verbo123])
    , ("o", Perfekto, [Verbo1, Verbo13])
    , ("elit", Komenco, [Verbo12])

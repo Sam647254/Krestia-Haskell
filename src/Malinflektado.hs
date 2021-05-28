@@ -69,13 +69,18 @@ legiFinaĵon = Legilo f where
          Just pi -> do
             (restantaj, _) <- malinflekti_ restanta
             case restantaj of
-               (NebazaŜtupo (n, _) : _) ->
-                  if n == PEsti then
-                     Just (NebazaŜtupo (pi, vt), pAlD restanta)
-                  else
-                     Just (NebazaŜtupo (i, vt), restanta)
+               (NebazaŜtupo (n, _) : _) | n == PEsti ->
+                  Just (NebazaŜtupo (pi, vt), pAlD restanta)
                _ -> Just (NebazaŜtupo (i, vt), restanta)
-         Nothing -> Just (NebazaŜtupo (i, vt), restanta))
+         Nothing ->
+            if i == Kvalito then do
+               (restantaj, _) <- malinflekti_ restanta
+               case restantaj of
+                  (NebazaŜtupo (n, _) : _) | n == PEsti ->
+                     Just (NebazaŜtupo (i, vt), pAlD restanta)
+                  _ -> Nothing
+            else
+               Just (NebazaŜtupo (i, vt), restanta))
       <|> apliki legiPEsti vorto
       <|> apliki legiBazanVorton vorto
 
