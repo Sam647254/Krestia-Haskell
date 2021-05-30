@@ -44,3 +44,8 @@ spec = do
       it "povas legi AEsti" do
          testiInflekcion AEstiA "tatreteva" "tatrete" SubstantivoN
          testiInflekcion AEstiA "kunava" "kuna" SubstantivoNN
+   
+   describe "Verboj" do
+      describe "Verbo1" do
+         it "povas legi Ĝerundo" do
+            testiInflekcion Ĝerundo "melismea" "melis" Verbo1

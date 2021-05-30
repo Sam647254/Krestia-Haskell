@@ -34,8 +34,10 @@ data Inflekcio
    | Ĝerundo
    | ĜerundoS
    | Havado
+   | HavadoM
    | Ekzistado
    | Translativo
+   | TranslativoM
    | Apartigita
    | Sola
    | Progresivo
@@ -72,8 +74,26 @@ finaĵojKajĴustajSekvaĵoj =
    , ("vra", ĜerundoS, [SubstantivoN, SubstantivoNN])
    , ("re", Kvalito, [SubstantivoN, SubstantivoNN])
    , ("ra", Sola, [SubstantivoN, SubstantivoNN])
+   , ("rem", HavadoM, [SubstantivoN, SubstantivoNN])
+   , ("res", Havado, [SubstantivoN, SubstantivoNN])
+   , ("rim", Ekzistado, [SubstantivoN, SubstantivoNN])
+   , ("lam", TranslativoM, [SubstantivoN, SubstantivoNN])
+   , ("las", Translativo, [SubstantivoN, SubstantivoNN])
+   
+   , ("io", Perfekto, [Verbo0])
+   , ("ia", Hipotezo, [Verbo0])
+   , ("ela", Intenco, [Verbo0, Verbo1, Verbo12, Verbo13, Verbo123, Verbo2, Verbo23, Verbo3])
+   , ("ea", Ĝerundo, [Verbo0])
    , ("ro", Perfekto, [Verbo12, Verbo123])
    , ("o", Perfekto, [Verbo1, Verbo13])
+   , ("e", Hipotezo, [Verbo1, Verbo13])
+   , ("ora", Desiderativo, [Verbo1, Verbo12, Verbo13, Verbo123])
+   , ("i", Imperativo, [Verbo1, Verbo13])
+   , ("ie", Optativo, [Verbo1])
+   , ("a", Hortativo, [Verbo1])
+   , ("etie", Argumento1, [Verbo1, Verbo12, Verbo13, Verbo123])
+   , ("mea", Ĝerundo, [Verbo1])
+   , ("elim", Komenco, [Verbo0])
    , ("elit", Komenco, [Verbo12])
    , ("elis", Komenco, [Verbo1])
    , ("elish", Komenco, [Verbo13])
@@ -128,10 +148,15 @@ bazaFinaĵoDe vorto =
          <|> (find (`isPrefixOf` rvorto) (reverse <$> finaĵojDeSubstantivoNN) & fmap (const SubstantivoNN))
 
 semblas :: (Inflekcio, Vorttipo) -> Vorttipo -> Bool
-semblas (Progresivo, verbo) celaVerbo = verbo == celaVerbo && ĉuVerbo verbo
-semblas (Perfekto, verbo) celaVerbo = verbo == celaVerbo && ĉuVerbo verbo
-semblas (Komenco, verbo) celaVerbo = verbo == celaVerbo && ĉuVerbo verbo
-semblas _ _ = False
+semblas (Havado, _) Verbo1 = True
+semblas (HavadoM, _) Verbo0 = True
+semblas (Ĝerundo, _) SubstantivoNN = True
+semblas (ĜerundoS, _) SubstantivoNN = True
+semblas (Kvalito, _) SubstantivoNN = True
+semblas (Argumento1, _) SubstantivoN = True
+semblas (Argumento2, _) SubstantivoN = True
+semblas (Argumento3, _) SubstantivoN = True
+semblas (_, vt1) vt2 = vt1 == vt2
 
 uzasPEsti :: Inflekcio -> Maybe Inflekcio
 uzasPEsti ĜerundoS = Just Ĝerundo

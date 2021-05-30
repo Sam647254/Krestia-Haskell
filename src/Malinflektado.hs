@@ -58,6 +58,46 @@ instance Monad Legilo where
       (valuo2, restanta2) <- apliki (legiloF valuo) restanta
       return (valuo2, restanta2))
 
+proviTuteMalinflekti :: (Finaĵo, Inflekcio, [Vorttipo]) -> [Vorttipo] -> String -> Maybe ([MalinflektaŜtupo], String)
+proviTuteMalinflekti (finaĵo, inflekcio, vorttipoj) pravajVorttipoj vorto =
+   if finaĵo `isSuffixOf` vorto && (pravajVorttipoj == [Ĉio] || vorttipoj `isSubsequenceOf` pravajVorttipoj) then do
+      let restanta = take (length vorto - length finaĵo) vorto
+      case uzasPEsti inflekcio of
+         Just pi -> undefined
+         Nothing ->
+            if inflekcio == Kvalito then
+               undefined
+            else do
+               (restantajŜtupoj, bazaVorto) <- tuteMalinflekti2 vorttipoj restanta
+               return (NebazaŜtupo (inflekcio, vorttipoj) : restantajŜtupoj, bazaVorto)
+   else
+      Nothing
+
+tuteMalinflekti2Ak :: [(Finaĵo, Inflekcio, [Vorttipo])] -> [Vorttipo]
+   -> [MalinflektaŜtupo] -> String -> Maybe ([MalinflektaŜtupo], String)
+tuteMalinflekti2Ak [] pravajVorttipoj ŝtupoj vorto = (do
+   (pEstiŜtupo, restantaVorto) <- apliki legiPEsti vorto
+   (restantajŜtupoj, bazaVorto) <- tuteMalinflekti2 [SubstantivoN, SubstantivoNN] restantaVorto
+   return (pEstiŜtupo : restantajŜtupoj <> ŝtupoj, bazaVorto))
+   <|> (do
+   (lastaŜtupo, bazaVorto) <- apliki legiBazanVorton vorto
+   case lastaŜtupo of
+      BazaŜtupo vt | vt `elem` pravajVorttipoj || pravajVorttipoj == [Ĉio] ->
+         return ([lastaŜtupo], bazaVorto)
+      _ -> Nothing)
+
+tuteMalinflekti2Ak (sekva : restantaj) pravajVorttipoj ŝtupoj vorto =
+   case proviTuteMalinflekti sekva pravajVorttipoj vorto of
+      Just (restantajŜtupoj, bazaVorto) ->
+         Just (restantajŜtupoj <> ŝtupoj, bazaVorto)
+      Nothing -> tuteMalinflekti2Ak restantaj pravajVorttipoj ŝtupoj vorto
+
+tuteMalinflekti2 :: [Vorttipo] -> String -> Maybe ([MalinflektaŜtupo], String)
+tuteMalinflekti2 pravajVorttipoj = tuteMalinflekti2Ak finaĵojKajĴustajSekvaĵoj pravajVorttipoj []
+
+malinflekti2 :: String -> Maybe ([MalinflektaŜtupo], String)
+malinflekti2 = tuteMalinflekti2 [Ĉio]
+
 legiFinaĵon :: Legilo MalinflektaŜtupo
 legiFinaĵon = Legilo f where
    f :: String -> Maybe (MalinflektaŜtupo, String)
