@@ -88,7 +88,7 @@ finaĵojKajĴustajSekvaĵoj =
    , ("o", Perfekto, [Verbo1, Verbo13])
    , ("e", Hipotezo, [Verbo1, Verbo13])
    , ("ora", Desiderativo, [Verbo1, Verbo12, Verbo13, Verbo123])
-   , ("i", Imperativo, [Verbo1, Verbo13])
+   , ("ea", Imperativo, [Verbo1, Verbo13])
    , ("ie", Optativo, [Verbo1])
    , ("a", Hortativo, [Verbo1])
    , ("etie", Argumento1, [Verbo1, Verbo12, Verbo13, Verbo123])

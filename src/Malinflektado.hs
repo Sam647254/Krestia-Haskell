@@ -63,10 +63,20 @@ proviTuteMalinflekti (finaĵo, inflekcio, vorttipoj) pravajVorttipoj vorto =
    if finaĵo `isSuffixOf` vorto && (pravajVorttipoj == [Ĉio] || vorttipoj `isSubsequenceOf` pravajVorttipoj) then do
       let restanta = take (length vorto - length finaĵo) vorto
       case uzasPEsti inflekcio of
-         Just pi -> undefined
+         Just pi -> do
+            (ŝtupoj, bazaVorto) <- tuteMalinflekti2 vorttipoj restanta
+            case ŝtupoj of
+               (NebazaŜtupo (PEsti, _) : restantajŜtupoj) ->
+                  return (NebazaŜtupo (pi, vorttipoj) : restantajŜtupoj, bazaVorto)
+               restantajŜtupoj -> do
+                  return (NebazaŜtupo (inflekcio, vorttipoj) : restantajŜtupoj, bazaVorto)
          Nothing ->
-            if inflekcio == Kvalito then
-               undefined
+            if inflekcio == Kvalito then do
+               (ŝtupoj, bazaVorto) <- tuteMalinflekti2 vorttipoj restanta
+               case ŝtupoj of
+                  (NebazaŜtupo (PEsti, _) : restantajŜtupoj) ->
+                     return (NebazaŜtupo (Kvalito , vorttipoj) : restantajŜtupoj, bazaVorto)
+                  restantajŜtupoj -> Nothing
             else do
                (restantajŜtupoj, bazaVorto) <- tuteMalinflekti2 vorttipoj restanta
                return (NebazaŜtupo (inflekcio, vorttipoj) : restantajŜtupoj, bazaVorto)
@@ -176,7 +186,7 @@ malinflekti_ = (`tuteMalinflekti` [Ĉio])
 
 malinflekti :: String -> Maybe MalinflektitaVorto
 malinflekti vorto =
-   tuteMalinflekti vorto [Ĉio]
+   tuteMalinflekti2 [Ĉio] vorto
    & fmap (\(ŝtupoj, bazaVorto) ->
       let
          inflekcioj =
