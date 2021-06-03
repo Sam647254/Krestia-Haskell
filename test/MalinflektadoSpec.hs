@@ -14,6 +14,10 @@ testiInflekcion inflekcio vorto bazaVorto vorttipo = do
    malinflekti vorto `shouldBe`
       Just (MalinflektitaVorto {ŝtupoj=[inflekcio], bazaTipo=vorttipo, bazaVorto=bazaVorto})
 
+testiInflekciojn inflekcioj vorto bazaVorto vorttipo = do
+   malinflekti vorto `shouldBe`
+      Just (MalinflektitaVorto {ŝtupoj=inflekcioj, bazaTipo=vorttipo, bazaVorto=bazaVorto})
+
 spec :: Spec
 spec = do
    describe "Bazaj vortoj" do
@@ -49,3 +53,9 @@ spec = do
       describe "Verbo1" do
          it "povas legi Ĝerundo" do
             testiInflekcion Ĝerundo "melismea" "melis" Verbo1
+      
+      describe "multŝtupaj inflekcioj" do
+         it "can read multi-step derivations" do
+            testiInflekciojn [Unue2, Perfekto] "setretro" "set" Verbo12
+            testiInflekciojn [Unue2, Komenco, Argumento2, Translativo, Intenco]
+               "setretelitonialasela" "set" Verbo12

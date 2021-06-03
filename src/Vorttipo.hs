@@ -58,6 +58,8 @@ data Inflekcio
    | Unue3
    | Komenco
    | Reflekcio
+   | ReflekcioM
+   | ReflekcioS
    | Antaŭigita
    | Kvalito
    | SolaFormo
@@ -80,24 +82,49 @@ finaĵojKajĴustajSekvaĵoj =
    , ("lam", TranslativoM, [SubstantivoN, SubstantivoNN])
    , ("las", Translativo, [SubstantivoN, SubstantivoNN])
    
-   , ("io", Perfekto, [Verbo0])
-   , ("ia", Hipotezo, [Verbo0])
+   , ("io", Perfekto, [Verbo0, Verbo2, Verbo3, Verbo23])
+   , ("ia", Hipotezo, [Verbo0, Verbo2, Verbo3, Verbo23])
    , ("ela", Intenco, [Verbo0, Verbo1, Verbo12, Verbo13, Verbo123, Verbo2, Verbo23, Verbo3])
-   , ("ea", Ĝerundo, [Verbo0])
+   , ("ea", Ĝerundo, [Verbo0, Verbo12, Verbo123, Verbo2, Verbo3, Verbo23])
    , ("ro", Perfekto, [Verbo12, Verbo123])
    , ("o", Perfekto, [Verbo1, Verbo13])
    , ("e", Hipotezo, [Verbo1, Verbo13])
    , ("ora", Desiderativo, [Verbo1, Verbo12, Verbo13, Verbo123])
    , ("ea", Imperativo, [Verbo1, Verbo13])
-   , ("ie", Optativo, [Verbo1])
-   , ("a", Hortativo, [Verbo1])
+   , ("ri", Imperativo, [Verbo12, Verbo123])
+   , ("ie", Optativo, [Verbo1, Verbo13, Verbo3])
+   , ("ra", Optativo, [Verbo2])
+   , ("ri", Optativo, [Verbo23])
+   , ("a", Hortativo, [Verbo1, Verbo13])
    , ("etie", Argumento1, [Verbo1, Verbo12, Verbo13, Verbo123])
-   , ("mea", Ĝerundo, [Verbo1])
+   , ("onia", Argumento2, [Verbo12, Verbo2, Verbo123, Verbo23])
+   , ("eri", Argumento3, [Verbo123, Verbo13, Verbo3, Verbo123])
+   , ("mea", Ĝerundo, [Verbo1, Verbo13])
    , ("elim", Komenco, [Verbo0])
    , ("elit", Komenco, [Verbo12])
    , ("elis", Komenco, [Verbo1])
    , ("elish", Komenco, [Verbo13])
    , ("elip", Komenco, [Verbo123])
+   , ("em", Parto1, [Verbo1])
+   , ("ig", Parto1, [Verbo12])
+   , ("ev", Parto1, [Verbo123])
+   , ("es", Parto2, [Verbo12])
+   , ("am", Parto2, [Verbo2])
+   , ("on", Parto2, [Verbo23])
+   , ("osh", Parto2, [Verbo123])
+   , ("ut", Parto3, [Verbo123])
+   , ("ig", Parto3, [Verbo23])
+   , ("ris", Reflekcio, [Verbo12])
+   , ("ish", Reflekcio, [Verbo123])
+   , ("es", Reflekcio, [Verbo13])
+   , ("is", ReflekcioS, [Verbo123])
+   , ("im", ReflekcioM, [Verbo123])
+   , ("rim", ReflekcioM, [Verbo12])
+   , ("ret", Unue2, [Verbo12])
+   , ("rop", Unue2, [Verbo123])
+   , ("rup", Unue3, [Verbo123])
+   , ("rosh", Unue3, [Verbo13])
+   , ("riv", Unue3, [Verbo23])
    ]
 
 finaĵojDeSubstantivoN :: [String]
@@ -153,10 +180,24 @@ semblas (HavadoM, _) Verbo0 = True
 semblas (Ĝerundo, _) SubstantivoNN = True
 semblas (ĜerundoS, _) SubstantivoNN = True
 semblas (Kvalito, _) SubstantivoNN = True
+semblas (Translativo, _) Verbo1 = True
+semblas (TranslativoM, _) Verbo0 = True
 semblas (Argumento1, _) SubstantivoN = True
 semblas (Argumento2, _) SubstantivoN = True
 semblas (Argumento3, _) SubstantivoN = True
-semblas (_, vt1) vt2 = vt1 == vt2
+semblas (Parto1, Verbo1) Verbo0 = True
+semblas (Parto1, Verbo12) Verbo2 = True
+semblas (Parto1, Verbo123) Verbo23 = True
+semblas (Parto2, Verbo2) Verbo0 = True
+semblas (Parto2, Verbo12) Verbo1 = True
+semblas (Parto2, Verbo123) Verbo13 = True
+semblas (Parto3, Verbo3) Verbo0 = True
+semblas (Parto3, Verbo23) Verbo2 = True
+semblas (Parto3, Verbo123) Verbo12 = True
+semblas (Komenco, vt) vt2 = vt == vt2
+semblas (Unue2, vt) vt2 = vt == vt2
+semblas (Unue3, vt) vt2 = vt == vt2
+semblas _ _ = False
 
 uzasPEsti :: Inflekcio -> Maybe Inflekcio
 uzasPEsti ĜerundoS = Just Ĝerundo

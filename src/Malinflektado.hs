@@ -1,6 +1,7 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE TupleSections #-}
 module Malinflektado where
 
 -- many legiFinaĵon <|> legiBazanVorton
@@ -60,7 +61,11 @@ instance Monad Legilo where
 
 proviTuteMalinflekti :: (Finaĵo, Inflekcio, [Vorttipo]) -> [Vorttipo] -> String -> Maybe ([MalinflektaŜtupo], String)
 proviTuteMalinflekti (finaĵo, inflekcio, vorttipoj) pravajVorttipoj vorto =
-   if finaĵo `isSuffixOf` vorto && (pravajVorttipoj == [Ĉio] || vorttipoj `isSubsequenceOf` pravajVorttipoj) then do
+   let
+      pravaInflekcio =
+         concatMap ((\p -> map (\pvt -> p `semblas` pvt) pravajVorttipoj) . (inflekcio,)) vorttipoj & or
+   in
+   if finaĵo `isSuffixOf` vorto && (pravajVorttipoj == [Ĉio] || pravaInflekcio) then do
       let restanta = take (length vorto - length finaĵo) vorto
       case uzasPEsti inflekcio of
          Just pi -> do
