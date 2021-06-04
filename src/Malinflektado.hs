@@ -92,8 +92,12 @@ tuteMalinflekti2Ak :: [(Finaĵo, Inflekcio, [Vorttipo])] -> [Vorttipo]
    -> [MalinflektaŜtupo] -> String -> Maybe ([MalinflektaŜtupo], String)
 tuteMalinflekti2Ak [] pravajVorttipoj ŝtupoj vorto = (do
    (pEstiŜtupo, restantaVorto) <- apliki legiPEsti vorto
-   (restantajŜtupoj, bazaVorto) <- tuteMalinflekti2 [SubstantivoN, SubstantivoNN] restantaVorto
+   (restantajŜtupoj, bazaVorto) <- tuteMalinflekti2 pravajVorttipoj restantaVorto
    return (pEstiŜtupo : restantajŜtupoj <> ŝtupoj, bazaVorto))
+   <|> (do
+      (antaŭigitaŜtupo, restantaVorto) <- apliki legiAntaŭigita vorto
+      (restantajŜtupoj, bazaVorto) <- tuteMalinflekti2 pravajVorttipoj restantaVorto
+      return (antaŭigitaŜtupo : restantajŜtupoj, bazaVorto))
    <|> (do
    (lastaŜtupo, bazaVorto) <- apliki legiBazanVorton vorto
    case lastaŜtupo of
@@ -113,32 +117,6 @@ tuteMalinflekti2 pravajVorttipoj = tuteMalinflekti2Ak finaĵojKajĴustajSekvaĵo
 malinflekti2 :: String -> Maybe ([MalinflektaŜtupo], String)
 malinflekti2 = tuteMalinflekti2 [Ĉio]
 
-legiFinaĵon :: Legilo MalinflektaŜtupo
-legiFinaĵon = Legilo f where
-   f :: String -> Maybe (MalinflektaŜtupo, String)
-   f [] = Nothing
-   f vorto = (do
-      (f, i, vt) <- find (\(finaĵo, _, _) -> finaĵo `isSuffixOf` vorto) finaĵojKajĴustajSekvaĵoj
-      let restanta = take (length vorto - length f) vorto
-      case uzasPEsti i of
-         Just pi -> do
-            (restantaj, _) <- malinflekti_ restanta
-            case restantaj of
-               (NebazaŜtupo (n, _) : _) | n == PEsti ->
-                  Just (NebazaŜtupo (pi, vt), pAlD restanta)
-               _ -> Just (NebazaŜtupo (i, vt), restanta)
-         Nothing ->
-            if i == Kvalito then do
-               (restantaj, _) <- malinflekti_ restanta
-               case restantaj of
-                  (NebazaŜtupo (n, _) : _) | n == PEsti ->
-                     Just (NebazaŜtupo (i, vt), pAlD restanta)
-                  _ -> Nothing
-            else
-               Just (NebazaŜtupo (i, vt), restanta))
-      <|> apliki legiPEsti vorto
-      <|> apliki legiBazanVorton vorto
-
 legiPEsti :: Legilo MalinflektaŜtupo
 legiPEsti = Legilo f where
    f [] = Nothing
@@ -146,6 +124,27 @@ legiPEsti = Legilo f where
       (vorttipo, _) <-
          find (\(tipo, finaĵoj) -> any (`isSuffixOf` vorto) finaĵoj) finaĵojDePEsti
       return (NebazaŜtupo (PEsti, [vorttipo]), pAlD vorto)
+   
+legiAntaŭigita :: Legilo MalinflektaŜtupo
+legiAntaŭigita = Legilo f where
+   f [] = Nothing
+   f vorto =
+      if "dri" `isSuffixOf` vorto || "gri" `isSuffixOf` vorto 
+         || "dru" `isSuffixOf` vorto || "gru" `isSuffixOf` vorto then do
+         let
+            restantaVorto = mAlA vorto
+            sekva =
+               if "dri" `isSuffixOf` vorto || "dru" `isSuffixOf` vorto then
+                  KunigaSubstantivoN
+               else
+                  KunigaSubstantivoNN
+         (bazo, _) <- apliki legiBazanVorton restantaVorto
+         case bazo of
+            BazaŜtupo vt | vt == KunigaSubstantivoN || vt == KunigaSubstantivoNN ->
+               return (NebazaŜtupo (Malantaŭigita, [sekva]), restantaVorto)
+            _ -> undefined
+      else
+         Nothing
 
 legiBazanVorton :: Legilo MalinflektaŜtupo
 legiBazanVorton = Legilo f where
@@ -153,41 +152,6 @@ legiBazanVorton = Legilo f where
    f vorto = bazaFinaĵoDe vorto
       & (>>= (\v -> if ĉuValidaVorto vorto then Just v else Nothing))
       & fmap (\v -> (BazaŜtupo v, vorto))
-
-legiLastanŜtupon :: Legilo [MalinflektaŜtupo]
-legiLastanŜtupon = do
-   b <- legiBazanVorton
-   return [b]
-
-tuteMalinflekti :: String -> [Vorttipo] -> Maybe ([MalinflektaŜtupo], String)
-tuteMalinflekti vorto pravajVorttipoj = do
-   (sekvaŜtupo, restanta) <- apliki legiFinaĵon vorto
-   case sekvaŜtupo of
-      NebazaŜtupo (_, s) -> do
-         (restantaj, lasta) <-
-            tuteMalinflekti restanta s
-            <|> apliki legiLastanŜtupon restanta
-            <|> apliki legiLastanŜtupon vorto
-         case restantaj of
-            (NebazaŜtupo (_, vt) : _) ->
-               if (not . null) (vt `intersect` s) then
-                  return (sekvaŜtupo : restantaj, lasta)
-               else do
-                  (baza, lasta) <- apliki legiBazanVorton vorto
-                  return ([baza], lasta)
-            [BazaŜtupo vt] ->
-               if vt `elem` s then
-                  return (if lasta /= restanta then restantaj else sekvaŜtupo : restantaj, lasta)
-               else do
-                  (baza, lasta') <- apliki legiBazanVorton vorto
-                  return ([baza], lasta)
-            _ -> undefined
-      BazaŜtupo v -> do
-         guard (v `elem` pravajVorttipoj || pravajVorttipoj == [Ĉio])
-         return ([sekvaŜtupo], restanta)
-
-malinflekti_ :: String -> Maybe ([MalinflektaŜtupo], String)
-malinflekti_ = (`tuteMalinflekti` [Ĉio])
 
 malinflekti :: String -> Maybe MalinflektitaVorto
 malinflekti vorto =

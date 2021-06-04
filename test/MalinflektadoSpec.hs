@@ -23,6 +23,9 @@ spec = do
    describe "Bazaj vortoj" do
       it "povas malinflekti SubstantivoN" do
          testiBazanVorton "vilka" SubstantivoN
+      
+      it "povas malinflekti KunigaSubstativoN" do
+         testiBazanVorton "edre" KunigaSubstantivoN
 
       it "povas malinflekti Verbo12" do
          testiBazanVorton "set" Verbo12
@@ -48,6 +51,10 @@ spec = do
       it "povas legi AEsti" do
          testiInflekcion AEstiA "tatreteva" "tatrete" SubstantivoN
          testiInflekcion AEstiA "kunava" "kuna" SubstantivoNN
+   
+   describe "Kunigaj substantivoj" do
+      it "povas legi PEsti" do
+         testiInflekcion PEsti "edro" "edre" KunigaSubstantivoN
    
    describe "Verboj" do
       describe "Verbo1" do

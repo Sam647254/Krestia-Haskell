@@ -60,7 +60,7 @@ data Inflekcio
    | Reflekcio
    | ReflekcioM
    | ReflekcioS
-   | Antaŭigita
+   | Malantaŭigita
    | Kvalito
    | SolaFormo
    | FremdaVortoI
@@ -144,6 +144,8 @@ finaĵojDePEsti :: [(Vorttipo, [String])]
 finaĵojDePEsti =
    [ (SubstantivoN, ["paa", "po", "pu", "taa", "to", "tu", "kaa", "ko", "ku"])
    , (SubstantivoNN, ["maa", "mo", "mu", "naa", "no", "nu"])
+   , (KunigaSubstantivoN, ["dro"])
+   , (KunigaSubstantivoNN, ["gro"])
    ]
 
 finaĵojDeSubstantivoNN :: [String]
@@ -163,6 +165,12 @@ pAlD substantivo =
       ('u' : r) -> reverse ('i' : r)
       _ -> undefined
 
+mAlA kunigaS =
+   case reverse kunigaS of
+      ('u' : r) -> reverse ('o' : r)
+      ('i' : r) -> reverse ('e' : r)
+      _ -> undefined
+
 bazaFinaĵoDe :: String -> Maybe Vorttipo
 bazaFinaĵoDe vorto =
    case reverse vorto of
@@ -173,6 +181,11 @@ bazaFinaĵoDe vorto =
       rvorto ->
          (find (`isPrefixOf` rvorto) (reverse <$> finaĵojDeSubstantivoN) & fmap (const SubstantivoN))
          <|> (find (`isPrefixOf` rvorto) (reverse <$> finaĵojDeSubstantivoNN) & fmap (const SubstantivoNN))
+         <|> (do
+            case vorto of
+               _ | "dre" `isSuffixOf` vorto -> return KunigaSubstantivoN
+               _ | "gre" `isSuffixOf` vorto -> return KunigaSubstantivoNN
+               _ -> Nothing)
 
 semblas :: (Inflekcio, Vorttipo) -> Vorttipo -> Bool
 semblas (Havado, _) Verbo1 = True
