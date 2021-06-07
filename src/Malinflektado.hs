@@ -15,6 +15,7 @@ import Data.Maybe
 import Control.Applicative
 import Control.Arrow
 import Fonotaktiko
+import Data.Char
 
 newtype Legilo a = Legilo (String -> Maybe (a, String))
 
@@ -112,7 +113,10 @@ tuteMalinflekti2Ak (sekva : restantaj) pravajVorttipoj ŝtupoj vorto =
       Nothing -> tuteMalinflekti2Ak restantaj pravajVorttipoj ŝtupoj vorto
 
 tuteMalinflekti2 :: [Vorttipo] -> String -> Maybe ([MalinflektaŜtupo], String)
-tuteMalinflekti2 pravajVorttipoj = tuteMalinflekti2Ak finaĵojKajĴustajSekvaĵoj pravajVorttipoj []
+tuteMalinflekti2 pravajVorttipoj vorto = (do
+   (bazaŜtupo, bazaVorto) <- apliki legiFremdanVorton vorto
+   return ([bazaŜtupo], bazaVorto))
+   <|> tuteMalinflekti2Ak finaĵojKajĴustajSekvaĵoj pravajVorttipoj [] vorto
 
 malinflekti2 :: String -> Maybe ([MalinflektaŜtupo], String)
 malinflekti2 = tuteMalinflekti2 [Ĉio]
@@ -152,6 +156,11 @@ legiBazanVorton = Legilo f where
    f vorto = bazaFinaĵoDe vorto
       & (>>= (\v -> if ĉuValidaVorto vorto then Just v else Nothing))
       & fmap (\v -> (BazaŜtupo v, vorto))
+
+legiFremdanVorton :: Legilo MalinflektaŜtupo
+legiFremdanVorton = Legilo f where
+   f vorto | isUpper (head vorto) = Just (BazaŜtupo FremdaVorto, vorto)
+   f _ = Nothing
 
 malinflekti :: String -> Maybe MalinflektitaVorto
 malinflekti vorto =
