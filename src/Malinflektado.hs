@@ -11,13 +11,12 @@ import Data.List
 import qualified Data.Text as T
 import Vorttipo
 import Data.Function
-import Data.Maybe
 import Control.Applicative
 import Control.Arrow
 import Fonotaktiko
 import Data.Char
 
-newtype Legilo a = Legilo (String -> Maybe (a, String))
+newtype Legilo a = Legilo (String -> Either String (a, String))
 
 data MalinflektaŜtupo
    = NebazaŜtupo (Inflekcio, [Vorttipo])
@@ -31,25 +30,31 @@ data MalinflektitaVorto = MalinflektitaVorto
    }
    deriving (Show, Eq)
 
-apliki :: Legilo a -> String -> Maybe (a, String)
+apliki :: Legilo a -> String -> Either String (a, String)
 apliki (Legilo legilo) = legilo
 
 instance Functor Legilo where
    fmap = liftM
 
 instance Applicative Legilo where
-   pure valuo = Legilo (\eniro -> Just (valuo, eniro))
+   pure valuo = Legilo (\eniro -> Right (valuo, eniro))
    (<*>) = ap
 
 instance Alternative Legilo where
-   empty = Legilo (const Nothing)
+   empty = Legilo Left
    (<|>) legilo1 legilo2 = Legilo f where
       f eniro =
          let rezulto1 = apliki legilo1 eniro in
-            if isNothing rezulto1 then
-               apliki legilo2 eniro
-            else
-               rezulto1
+            case rezulto1 of
+               Left _ -> apliki legilo2 eniro
+               Right _ -> rezulto1
+
+instance Monoid left => Alternative (Either left) where
+  empty = Left mempty
+  (<|>) either1 either2 =
+     case either1 of
+        Left _ -> either2
+        _ -> either1
 
 instance Monad Legilo where
    return = pure
@@ -60,7 +65,7 @@ instance Monad Legilo where
       (valuo2, restanta2) <- apliki (legiloF valuo) restanta
       return (valuo2, restanta2))
 
-proviTuteMalinflekti :: (Finaĵo, Inflekcio, [Vorttipo]) -> [Vorttipo] -> String -> Maybe ([MalinflektaŜtupo], String)
+proviTuteMalinflekti :: (Finaĵo, Inflekcio, [Vorttipo]) -> [Vorttipo] -> String -> Either String ([MalinflektaŜtupo], String)
 proviTuteMalinflekti (finaĵo, inflekcio, vorttipoj) pravajVorttipoj vorto =
    let
       pravaInflekcio =
@@ -82,15 +87,15 @@ proviTuteMalinflekti (finaĵo, inflekcio, vorttipoj) pravajVorttipoj vorto =
                case ŝtupoj of
                   (NebazaŜtupo (PEsti, _) : restantajŜtupoj) ->
                      return (NebazaŜtupo (Kvalito , vorttipoj) : restantajŜtupoj, bazaVorto)
-                  restantajŜtupoj -> Nothing
+                  restantajŜtupoj -> Left ("Kvalito must follow PEsti: " <> vorto)
             else do
                (restantajŜtupoj, bazaVorto) <- tuteMalinflekti2 vorttipoj restanta
                return (NebazaŜtupo (inflekcio, vorttipoj) : restantajŜtupoj, bazaVorto)
    else
-      Nothing
+      Left ("Cannot decompose " <> vorto)
 
 tuteMalinflekti2Ak :: [(Finaĵo, Inflekcio, [Vorttipo])] -> [Vorttipo]
-   -> [MalinflektaŜtupo] -> String -> Maybe ([MalinflektaŜtupo], String)
+   -> [MalinflektaŜtupo] -> String -> Either String ([MalinflektaŜtupo], String)
 tuteMalinflekti2Ak [] pravajVorttipoj ŝtupoj vorto = (do
    (pEstiŜtupo, restantaVorto) <- apliki legiPEsti vorto
    (restantajŜtupoj, bazaVorto) <- tuteMalinflekti2 pravajVorttipoj restantaVorto
@@ -104,34 +109,34 @@ tuteMalinflekti2Ak [] pravajVorttipoj ŝtupoj vorto = (do
    case lastaŜtupo of
       BazaŜtupo vt | vt `elem` pravajVorttipoj || pravajVorttipoj == [Ĉio] ->
          return ([lastaŜtupo], bazaVorto)
-      _ -> Nothing)
+      _ -> Left ("Invalid last step while decomposing " <> vorto))
 
 tuteMalinflekti2Ak (sekva : restantaj) pravajVorttipoj ŝtupoj vorto =
    case proviTuteMalinflekti sekva pravajVorttipoj vorto of
-      Just (restantajŜtupoj, bazaVorto) ->
-         Just (restantajŜtupoj <> ŝtupoj, bazaVorto)
-      Nothing -> tuteMalinflekti2Ak restantaj pravajVorttipoj ŝtupoj vorto
+      Right (restantajŜtupoj, bazaVorto) ->
+         Right (restantajŜtupoj <> ŝtupoj, bazaVorto)
+      Left _ -> tuteMalinflekti2Ak restantaj pravajVorttipoj ŝtupoj vorto
 
-tuteMalinflekti2 :: [Vorttipo] -> String -> Maybe ([MalinflektaŜtupo], String)
+tuteMalinflekti2 :: [Vorttipo] -> String -> Either String ([MalinflektaŜtupo], String)
 tuteMalinflekti2 pravajVorttipoj vorto = (do
    (bazaŜtupo, bazaVorto) <- apliki legiFremdanVorton vorto
    return ([bazaŜtupo], bazaVorto))
    <|> tuteMalinflekti2Ak finaĵojKajĴustajSekvaĵoj pravajVorttipoj [] vorto
 
-malinflekti2 :: String -> Maybe ([MalinflektaŜtupo], String)
+malinflekti2 :: String -> Either String ([MalinflektaŜtupo], String)
 malinflekti2 = tuteMalinflekti2 [Ĉio]
 
 legiPEsti :: Legilo MalinflektaŜtupo
 legiPEsti = Legilo f where
-   f [] = Nothing
+   f [] = Left "Empty string"
    f vorto = do
-      (vorttipo, _) <-
-         find (\(tipo, finaĵoj) -> any (`isSuffixOf` vorto) finaĵoj) finaĵojDePEsti
-      return (NebazaŜtupo (PEsti, [vorttipo]), pAlD vorto)
+      case find (\(tipo, finaĵoj) -> any (`isSuffixOf` vorto) finaĵoj) finaĵojDePEsti of
+         Just (vorttipo, _) -> Right (NebazaŜtupo (PEsti, [vorttipo]), pAlD vorto)
+         Nothing -> Left ("Cannot read PEsti from " <> vorto)
    
 legiAntaŭigita :: Legilo MalinflektaŜtupo
 legiAntaŭigita = Legilo f where
-   f [] = Nothing
+   f [] = Left "Empty string"
    f vorto =
       if "dri" `isSuffixOf` vorto || "gri" `isSuffixOf` vorto 
          || "dru" `isSuffixOf` vorto || "gru" `isSuffixOf` vorto then do
@@ -148,21 +153,25 @@ legiAntaŭigita = Legilo f where
                return (NebazaŜtupo (Malantaŭigita, [sekva]), restantaVorto)
             _ -> undefined
       else
-         Nothing
+         Left ("Cannot read Antaŭigita from " <> vorto)
 
 legiBazanVorton :: Legilo MalinflektaŜtupo
 legiBazanVorton = Legilo f where
-   f [] = Nothing
-   f vorto = bazaFinaĵoDe vorto
-      & (>>= (\v -> if ĉuValidaVorto vorto then Just v else Nothing))
-      & fmap (\v -> (BazaŜtupo v, vorto))
+   f [] = Left "Empty string passed to legiBazanVorton"
+   f vorto = case bazaFinaĵoDe vorto of
+      Just v ->
+         if ĉuValidaVorto vorto then
+            Right (BazaŜtupo v, vorto)
+         else
+            Left (vorto <> " is not a valid base word")
+      Nothing -> Left (vorto <> " is not a base word")
 
 legiFremdanVorton :: Legilo MalinflektaŜtupo
 legiFremdanVorton = Legilo f where
-   f vorto | isUpper (head vorto) = Just (BazaŜtupo FremdaVorto, vorto)
-   f _ = Nothing
+   f vorto | isUpper (head vorto) = Right (BazaŜtupo FremdaVorto, vorto)
+   f _ = Left "Cannot read FremdaVorto"
 
-malinflekti :: String -> Maybe MalinflektitaVorto
+malinflekti :: String -> Either String MalinflektitaVorto
 malinflekti vorto =
    tuteMalinflekti2 [Ĉio] vorto
    & fmap (\(ŝtupoj, bazaVorto) ->

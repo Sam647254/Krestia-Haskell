@@ -8,15 +8,15 @@ import Vorttipo
 testiBazanVorton :: String -> Vorttipo -> Expectation
 testiBazanVorton vorto vorttipo = do
    malinflekti vorto `shouldBe`
-      Just (MalinflektitaVorto {ŝtupoj=[], bazaTipo=vorttipo, bazaVorto=vorto})
+      Right (MalinflektitaVorto {ŝtupoj=[], bazaTipo=vorttipo, bazaVorto=vorto})
 
 testiInflekcion inflekcio vorto bazaVorto vorttipo = do
    malinflekti vorto `shouldBe`
-      Just (MalinflektitaVorto {ŝtupoj=[inflekcio], bazaTipo=vorttipo, bazaVorto=bazaVorto})
+      Right (MalinflektitaVorto {ŝtupoj=[inflekcio], bazaTipo=vorttipo, bazaVorto=bazaVorto})
 
 testiInflekciojn inflekcioj vorto bazaVorto vorttipo = do
    malinflekti vorto `shouldBe`
-      Just (MalinflektitaVorto {ŝtupoj=inflekcioj, bazaTipo=vorttipo, bazaVorto=bazaVorto})
+      Right (MalinflektitaVorto {ŝtupoj=inflekcioj, bazaTipo=vorttipo, bazaVorto=bazaVorto})
 
 spec :: Spec
 spec = do
