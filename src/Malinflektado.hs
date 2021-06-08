@@ -138,6 +138,7 @@ dividiRadikon :: MalinflektitaVorto -> Either String [String]
 dividiRadikon vorto =
    let
       bazo = bazaVorto vorto
+      tipo = bazaTipo vorto
       radiko =
          case bazaTipo vorto of
             SubstantivoN -> bazo
@@ -148,22 +149,33 @@ dividiRadikon vorto =
             Verbo13 -> take (length bazo - 2) bazo
             Rekordo -> take (length bazo - 2) bazo
             _ -> init bazo
-      finaĵoj = map show (ŝtupoj vorto)
-      bazaVorttipo =
-         [show (bazaTipo vorto) | not (bazaTipo vorto == SubstantivoN || bazaTipo vorto == SubstantivoN)]
+      finaĵoj =
+         if tipo == SubstantivoN || tipo == SubstantivoNN then
+            if null (ŝtupoj vorto) then
+               [show tipo]
+            else
+               map show (ŝtupoj vorto)
+         else
+            case ŝtupoj vorto of
+               (Malantaŭigita : restanta) ->
+                  case tipo of
+                     Modifanto -> "antaŭModifanto" : map show restanta
+                     KunigaSubstantivoN -> "malantaŭNombrigeblaEco" : map show restanta
+                     KunigaSubstantivoNN -> "malantaŭNenombrigeblaEco" : map show restanta
+               _ -> show tipo : map show (ŝtupoj vorto)
    in do
-      silaboj <- dividi bazo
-      return (if bazaTipo vorto == FremdaVorto then
+      silaboj <- dividi radiko
+      return (if tipo == FremdaVorto then
          ["["] <> silaboj <> ["]"]
       else
-         silaboj <> bazaVorttipo <> finaĵoj)
+         silaboj <> finaĵoj)
 
 legiAntaŭigita :: Legilo MalinflektaŜtupo
 legiAntaŭigita = Legilo f where
    f [] = Left "Empty string"
-   f vorto =
-      if "dri" `isSuffixOf` vorto || "gri" `isSuffixOf` vorto
-         || "dru" `isSuffixOf` vorto || "gru" `isSuffixOf` vorto then do
+   f vorto
+      | "dri" `isSuffixOf` vorto || "gri" `isSuffixOf` vorto
+         || "dru" `isSuffixOf` vorto || "gru" `isSuffixOf` vorto = do
          let
             restantaVorto = mAlA vorto
             sekva =
@@ -176,7 +188,11 @@ legiAntaŭigita = Legilo f where
             BazaŜtupo vt | vt == KunigaSubstantivoN || vt == KunigaSubstantivoNN ->
                return (NebazaŜtupo (Malantaŭigita, [sekva]), restantaVorto)
             _ -> undefined
-      else
+      | "r" `isSuffixOf` vorto = do
+         let restantaVorto = mAlA vorto
+         (bazo, _) <- apliki legiBazanVorton restantaVorto
+         return (NebazaŜtupo (Malantaŭigita, [Modifanto]), restantaVorto)
+      | otherwise =
          Left ("Cannot read Antaŭigita from " <> vorto)
 
 legiBazanVorton :: Legilo MalinflektaŜtupo

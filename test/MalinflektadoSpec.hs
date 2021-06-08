@@ -69,3 +69,4 @@ spec = do
             testiInflekciojn [Unue2, Perfekto] "setretro" "set" Verbo12
             testiInflekciojn [Unue2, Komenco, Argumento2, Translativo, Intenco]
                "setretelitonialasela" "set" Verbo12
+            testiInflekciojn [Malantaŭigita, PEsti] "edru" "edre" KunigaSubstantivoN

@@ -144,8 +144,8 @@ finaĵojDePEsti :: [(Vorttipo, [String])]
 finaĵojDePEsti =
    [ (SubstantivoN, ["paa", "po", "pu", "taa", "to", "tu", "kaa", "ko", "ku"])
    , (SubstantivoNN, ["maa", "mo", "mu", "naa", "no", "nu"])
-   , (KunigaSubstantivoN, ["dro"])
-   , (KunigaSubstantivoNN, ["gro"])
+   , (KunigaSubstantivoN, ["dro", "dru"])
+   , (KunigaSubstantivoNN, ["gro", "gru"])
    ]
 
 finaĵojDeSubstantivoNN :: [String]
@@ -169,6 +169,7 @@ mAlA kunigaS =
    case reverse kunigaS of
       ('u' : r) -> reverse ('o' : r)
       ('i' : r) -> reverse ('e' : r)
+      ('r' : r) -> reverse ('l' : r)
       _ -> undefined
 
 bazaFinaĵoDe :: String -> Maybe Vorttipo
@@ -178,6 +179,7 @@ bazaFinaĵoDe vorto =
       ('t' : _) -> Just Verbo12
       ('h' : 's' : _) -> Just Verbo13
       ('p' : _) -> Just Verbo123
+      ('l' : _) -> Just Modifanto
       rvorto ->
          (find (`isPrefixOf` rvorto) (reverse <$> finaĵojDeSubstantivoN) & fmap (const SubstantivoN))
          <|> (find (`isPrefixOf` rvorto) (reverse <$> finaĵojDeSubstantivoNN) & fmap (const SubstantivoNN))
@@ -208,6 +210,7 @@ semblas (Parto3, Verbo3) Verbo0 = True
 semblas (Parto3, Verbo23) Verbo2 = True
 semblas (Parto3, Verbo123) Verbo12 = True
 semblas (Komenco, vt) vt2 = vt == vt2
+semblas (Reflekcio, Verbo12) Verbo1 = True
 semblas (Unue2, vt) vt2 = vt == vt2
 semblas (Unue3, vt) vt2 = vt == vt2
 semblas _ _ = False
