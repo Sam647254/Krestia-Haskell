@@ -133,12 +133,36 @@ legiPEsti = Legilo f where
       case find (\(tipo, finaĵoj) -> any (`isSuffixOf` vorto) finaĵoj) finaĵojDePEsti of
          Just (vorttipo, _) -> Right (NebazaŜtupo (PEsti, [vorttipo]), pAlD vorto)
          Nothing -> Left ("Cannot read PEsti from " <> vorto)
-   
+
+dividiRadikon :: MalinflektitaVorto -> Either String [String]
+dividiRadikon vorto =
+   let
+      bazo = bazaVorto vorto
+      radiko =
+         case bazaTipo vorto of
+            SubstantivoN -> bazo
+            SubstantivoNN -> bazo
+            FremdaVorto -> bazo
+            KunigaSubstantivoN -> take (length bazo - 3) bazo
+            KunigaSubstantivoNN -> take (length bazo - 3) bazo
+            Verbo13 -> take (length bazo - 2) bazo
+            Rekordo -> take (length bazo - 2) bazo
+            _ -> init bazo
+      finaĵoj = map show (ŝtupoj vorto)
+      bazaVorttipo =
+         [show (bazaTipo vorto) | not (bazaTipo vorto == SubstantivoN || bazaTipo vorto == SubstantivoN)]
+   in do
+      silaboj <- dividi bazo
+      return (if bazaTipo vorto == FremdaVorto then
+         ["["] <> silaboj <> ["]"]
+      else
+         silaboj <> bazaVorttipo <> finaĵoj)
+
 legiAntaŭigita :: Legilo MalinflektaŜtupo
 legiAntaŭigita = Legilo f where
    f [] = Left "Empty string"
    f vorto =
-      if "dri" `isSuffixOf` vorto || "gri" `isSuffixOf` vorto 
+      if "dri" `isSuffixOf` vorto || "gri" `isSuffixOf` vorto
          || "dru" `isSuffixOf` vorto || "gru" `isSuffixOf` vorto then do
          let
             restantaVorto = mAlA vorto
