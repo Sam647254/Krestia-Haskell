@@ -65,7 +65,11 @@ instance Monad Legilo where
       (valuo2, restanta2) <- apliki (legiloF valuo) restanta
       return (valuo2, restanta2))
 
-proviTuteMalinflekti :: (Finaĵo, Inflekcio, [Vorttipo]) -> [Vorttipo] -> String -> Either String ([MalinflektaŜtupo], String)
+proviTuteMalinflekti ::
+   (Finaĵo, Inflekcio, [Vorttipo]) ->
+      [Vorttipo] ->
+         String ->
+            Either String ([MalinflektaŜtupo], String)
 proviTuteMalinflekti (finaĵo, inflekcio, vorttipoj) pravajVorttipoj vorto =
    let
       pravaInflekcio =
@@ -162,6 +166,7 @@ dividiRadikon vorto =
                      Modifanto -> "antaŭModifanto" : map show restanta
                      KunigaSubstantivoN -> "malantaŭNombrigeblaEco" : map show restanta
                      KunigaSubstantivoNN -> "malantaŭNenombrigeblaEco" : map show restanta
+                     _ -> undefined
                _ -> show tipo : map show (ŝtupoj vorto)
    in do
       silaboj <- dividi radiko
