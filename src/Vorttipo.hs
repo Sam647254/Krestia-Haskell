@@ -218,7 +218,3 @@ semblas _ _ = False
 uzasPEsti :: Inflekcio -> Maybe Inflekcio
 uzasPEsti ĜerundoS = Just Ĝerundo
 uzasPEsti _ = Nothing
-
-ĉuVerbo vorttipo =
-   vorttipo == Verbo1 ||
-   vorttipo == Verbo12

@@ -40,3 +40,44 @@ valencoDe vorto =
             _ -> 0
    in
    baza + deInflekcioj
+
+ĉuPredikato :: MalinflektitaVorto -> Bool
+ĉuPredikato vorto =
+   case ŝtupoj vorto of
+      [] ->
+         case bazaTipo vorto of
+            Verbo0 -> True
+            Verbo1 -> True
+            Verbo12 -> True
+            Verbo123 -> True
+            Verbo13 -> True
+            Verbo2 -> True
+            Verbo23 -> True
+            Verbo3 -> True
+            _ -> False
+      listo ->
+         case last listo of
+            Perfekto -> True
+            Intenco -> True
+            Desiderativo -> True
+            Imperativo -> True
+            Optativo -> True
+            Hortativo -> True
+            Hipotezo -> True
+            Havado -> True
+            HavadoM -> True
+            Ekzistado -> True
+            Translativo -> True
+            TranslativoM -> True
+            Parto1 -> True
+            Parto2 -> True
+            Parto3 -> True
+            Reflekcio -> True
+            ReflekcioM -> True
+            ReflekcioS -> True
+            Unue2 -> True
+            Unue3 -> True
+            PEsti -> True
+            Sola -> True
+            Komenco -> True
+            _ -> False

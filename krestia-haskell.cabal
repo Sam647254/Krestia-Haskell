@@ -27,6 +27,7 @@ library
       Fonotaktiko
       Iloj
       Malinflektado
+      Sintaksanalizilo
       Vorttipo
       Vorttraktado
   other-modules:
