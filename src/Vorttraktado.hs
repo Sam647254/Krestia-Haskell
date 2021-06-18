@@ -81,3 +81,9 @@ valencoDe vorto =
             Sola -> True
             Komenco -> True
             _ -> False
+
+ĉuArgumento :: MalinflektitaVorto -> Bool
+ĉuArgumento _ = undefined
+
+ĉuAldonaĵo :: MalinflektitaVorto -> Bool
+ĉuAldonaĵo _ = undefined
