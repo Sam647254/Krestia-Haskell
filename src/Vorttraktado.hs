@@ -83,7 +83,29 @@ valencoDe vorto =
             _ -> False
 
 ĉuArgumento :: MalinflektitaVorto -> Bool
-ĉuArgumento _ = undefined
+ĉuArgumento vorto =
+   case ŝtupoj vorto of
+      [] ->
+         case bazaTipo vorto of
+            SubstantivoN -> True
+            SubstantivoNN -> True
+            _ -> False
+      listo ->
+         case last listo of
+            Difinito -> True
+            Havaĵo -> True
+            Ĝerundo -> True
+            ĜerundoS -> True
+            Apartigita -> True
+            Argumento1 -> True
+            Argumento2 -> True
+            Argumento3 -> True
+            Malantaŭigita -> undefined
+            Kvalito -> True
+            SolaFormo -> True
+            FremdaVortoI -> True
+            CiferoI -> True
+            _ -> False
 
 ĉuAldonaĵo :: MalinflektitaVorto -> Bool
 ĉuAldonaĵo _ = undefined
