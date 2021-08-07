@@ -2,6 +2,7 @@ module Vorttraktado where
 
 import Malinflektado
 import Vorttipo
+
 valencoDe :: MalinflektitaVorto -> Int
 valencoDe vorto =
    let

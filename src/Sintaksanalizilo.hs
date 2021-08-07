@@ -10,9 +10,27 @@ import Data.Function
 
 data Sintaksanalizilo = Sintaksanalizilo
    { eniro :: [MalinflektitaVorto]
+   , modifitajVortoj :: [ModifitaVorto]
    , atendantajArgumentoj :: [Argumento]
    , atendantajPredikatoj :: [Predikato]
    }
+
+data Atributo
+   = Atributo MalinflektitaVorto
+   | AtributoKunAldonaĵoj MalinflektitaVorto [Argumento]
+   deriving (Show)
+
+data Modifanto
+   = AntaŭModifanto Atributo
+   | MalantaŭModifanto Atributo
+   | Nemodifanto
+   deriving (Show)
+
+data ModifitaVorto = ModifitaVorto
+   { vorto :: MalinflektitaVorto
+   , modifantoj :: [Modifanto]
+   }
+   deriving (Show)
 
 data Frazo = Frazo
    { predikato :: Predikato
@@ -43,6 +61,9 @@ data Eraro
    = FinoDeEniro
    | Alia String
    deriving (Show)
+
+ĉuPovasModifi :: Modifanto -> MalinflektitaVorto -> Bool
+ĉuPovasModifi modifanto vorto = undefined
 
 alportiSekvanVorton :: SAStato MalinflektitaVorto
 alportiSekvanVorton = do
@@ -86,5 +107,6 @@ legi2 sintaksanalizilo = do
 legi :: String -> Either String Rezulto
 legi eniraTeksto = do
    vortoj <- malinflektiTekston eniraTeksto
-   let a = execState (runExceptT legi1Ak) (Sintaksanalizilo {eniro=vortoj, atendantajArgumentoj=[], atendantajPredikatoj=[]})
+   let a = execState (runExceptT legi1Ak) (Sintaksanalizilo {eniro=vortoj, modifitajVortoj=[],
+      atendantajArgumentoj=[], atendantajPredikatoj=[]})
    legi2 a

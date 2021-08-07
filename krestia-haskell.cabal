@@ -28,6 +28,7 @@ library
       Iloj
       Malinflektado
       Sintaksanalizilo
+      Sintaksanalizilo.Fazo1
       Vorttipo
       Vorttraktado
   other-modules:
