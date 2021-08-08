@@ -7,6 +7,9 @@ import Control.Monad.Identity
 import Vorttraktado
 import Iloj
 import Data.Function
+import Data.Maybe (fromMaybe)
+import Control.Arrow
+import Vorttipo
 
 data Sintaksanalizilo = Sintaksanalizilo
    { eniro :: [MalinflektitaVorto]
@@ -16,7 +19,7 @@ data Sintaksanalizilo = Sintaksanalizilo
    }
 
 data Atributo
-   = Atributo MalinflektitaVorto
+   = Atributo ModifitaVorto
    | AtributoKunAldonaĵoj MalinflektitaVorto [Argumento]
    deriving (Show)
 
@@ -63,7 +66,29 @@ data Eraro
    deriving (Show)
 
 ĉuPovasModifi :: Modifanto -> MalinflektitaVorto -> Bool
-ĉuPovasModifi modifanto vorto = undefined
+ĉuPovasModifi modifanto v =
+   let
+      atributo =
+         case modifanto of
+            AntaŭModifanto a -> Just a
+            MalantaŭModifanto a -> Just a
+            _ -> Nothing
+   in
+   case atributo of
+      Nothing -> False
+      Just atributo ->
+         case atributo of
+            Atributo a ->
+               if null $ ŝtupoj $ vorto a then
+                  undefined
+               else
+                  case (last $ ŝtupoj $ vorto a, bazaTipo v) of
+                     (AEstiA, SubstantivoN) -> True
+                     (AEstiA, SubstantivoNN) -> True
+                     (AEstiMA, SubstantivoN) -> True
+                     (AEstiMA, SubstantivoNN) -> True
+                     _ -> False
+            AtributoKunAldonaĵoj aa _ -> undefined
 
 alportiSekvanVorton :: SAStato MalinflektitaVorto
 alportiSekvanVorton = do
