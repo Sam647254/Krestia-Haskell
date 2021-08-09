@@ -13,7 +13,6 @@ import Vorttipo
 
 data Sintaksanalizilo = Sintaksanalizilo
    { eniro :: [MalinflektitaVorto]
-   , modifitajVortoj :: [ModifitaVorto]
    , atendantajArgumentoj :: [Argumento]
    , atendantajPredikatoj :: [Predikato]
    }
@@ -21,19 +20,19 @@ data Sintaksanalizilo = Sintaksanalizilo
 data Atributo
    = Atributo ModifitaVorto
    | AtributoKunAldonaĵoj MalinflektitaVorto [Argumento]
-   deriving (Show)
+   deriving (Show, Eq)
 
 data Modifanto
    = AntaŭModifanto Atributo
    | MalantaŭModifanto Atributo
    | Nemodifanto
-   deriving (Show)
+   deriving (Show, Eq)
 
 data ModifitaVorto = ModifitaVorto
    { vorto :: MalinflektitaVorto
    , modifantoj :: [Modifanto]
    }
-   deriving (Show)
+   deriving (Show, Eq)
 
 data Frazo = Frazo
    { predikato :: Predikato
@@ -53,7 +52,7 @@ data Aldonaĵo
    deriving (Show)
 
 newtype Argumento = Argumento MalinflektitaVorto
-   deriving (Show)
+   deriving (Show, Eq)
 
 newtype Predikato = Predikato MalinflektitaVorto
    deriving (Show)
@@ -132,6 +131,6 @@ legi2 sintaksanalizilo = do
 legi :: String -> Either String Rezulto
 legi eniraTeksto = do
    vortoj <- malinflektiTekston eniraTeksto
-   let a = execState (runExceptT legi1Ak) (Sintaksanalizilo {eniro=vortoj, modifitajVortoj=[],
+   let a = execState (runExceptT legi1Ak) (Sintaksanalizilo {eniro=vortoj,
       atendantajArgumentoj=[], atendantajPredikatoj=[]})
    legi2 a

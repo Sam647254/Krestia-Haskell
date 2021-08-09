@@ -61,8 +61,10 @@ test-suite krestia-haskell-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Fazo1Spec
       FonotaktikoSpec
       MalinflektadoSpec
+      Testiloj
       VorttraktadoSpec
       Paths_krestia_haskell
   hs-source-dirs:

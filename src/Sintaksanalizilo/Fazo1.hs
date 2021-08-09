@@ -16,7 +16,7 @@ data SAFazo1Stato = SAFazo1Stato
 
 newtype SAFazo1Rezulto = SAFazo1Rezulto
    { modifitajVortoj :: [ModifitaVorto] }
-   deriving (Show)
+   deriving (Show, Eq)
 
 type F1Stato = ExceptT Eraro (State SAFazo1Stato)
 
