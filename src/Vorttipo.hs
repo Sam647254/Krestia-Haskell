@@ -21,7 +21,8 @@ data Vorttipo
    | Lokokupilo
    | Modifanto
    | FremdaVorto
-   | Cifero
+   | TerminaCifero
+   | NeterminaCifero
    | Ĉio
    deriving (Show, Eq)
 
@@ -174,20 +175,27 @@ mAlA kunigaS =
 
 bazaFinaĵoDe :: String -> Maybe Vorttipo
 bazaFinaĵoDe vorto =
-   case reverse vorto of
-      ('s' : _) -> Just Verbo1
-      ('t' : _) -> Just Verbo12
-      ('h' : 's' : _) -> Just Verbo13
-      ('p' : _) -> Just Verbo123
-      ('l' : _) -> Just Modifanto
-      rvorto ->
-         (find (`isPrefixOf` rvorto) (reverse <$> finaĵojDeSubstantivoN) & fmap (const SubstantivoN))
-         <|> (find (`isPrefixOf` rvorto) (reverse <$> finaĵojDeSubstantivoNN) & fmap (const SubstantivoNN))
-         <|> (do
-            case vorto of
-               _ | "dre" `isSuffixOf` vorto -> return KunigaSubstantivoN
-               _ | "gre" `isSuffixOf` vorto -> return KunigaSubstantivoNN
-               _ -> Nothing)
+   case vorto of
+      ('h' : _) -> Just Lokokupilo
+      _ ->
+         case reverse vorto of
+            ('m' : _) -> Just Verbo0
+            ('s' : _) -> Just Verbo1
+            ('t' : _) -> Just Verbo12
+            ('h' : 's' : _) -> Just Verbo13
+            ('p' : _) -> Just Verbo123
+            ('l' : _) -> Just Modifanto
+            ('i' : 'l' : _) -> Just Rekordo
+            rvorto ->
+               (find (`isPrefixOf` rvorto)
+                  (reverse <$> finaĵojDeSubstantivoN) & fmap (const SubstantivoN))
+               <|> (find (`isPrefixOf` rvorto) (reverse <$> finaĵojDeSubstantivoNN)
+                  & fmap (const SubstantivoNN))
+               <|> (do
+                  case vorto of
+                     _ | "dre" `isSuffixOf` vorto -> return KunigaSubstantivoN
+                     _ | "gre" `isSuffixOf` vorto -> return KunigaSubstantivoNN
+                     _ -> Nothing)
 
 semblas :: (Inflekcio, Vorttipo) -> Vorttipo -> Bool
 semblas (Havado, _) Verbo1 = True

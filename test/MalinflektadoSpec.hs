@@ -37,6 +37,9 @@ spec = do
       
       it "povas malinflekti FremdaVorto" do
          testiBazanVorton "Krestia" FremdaVorto
+      
+      it "povas legi Lokokupilo" do
+         testiBazanVorton "hise" Lokokupilo
    
    describe "Substantivoj" do
       it "povas legi PEsti" do

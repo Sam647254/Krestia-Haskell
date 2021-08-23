@@ -123,7 +123,7 @@ tuteMalinflekti2Ak (sekva : restantaj) pravajVorttipoj ŝtupoj vorto =
 
 tuteMalinflekti2 :: [Vorttipo] -> String -> Either String ([MalinflektaŜtupo], String)
 tuteMalinflekti2 pravajVorttipoj vorto = (do
-   (bazaŜtupo, bazaVorto) <- apliki legiFremdanVorton vorto
+   (bazaŜtupo, bazaVorto) <- apliki legiSpecialanVorton vorto
    return ([bazaŜtupo], bazaVorto))
    <|> tuteMalinflekti2Ak finaĵojKajĴustajSekvaĵoj pravajVorttipoj [] vorto
 
@@ -148,6 +148,7 @@ dividiRadikon vorto =
             SubstantivoN -> bazo
             SubstantivoNN -> bazo
             FremdaVorto -> bazo
+            Lokokupilo  -> bazo
             KunigaSubstantivoN -> take (length bazo - 3) bazo
             KunigaSubstantivoNN -> take (length bazo - 3) bazo
             Verbo13 -> take (length bazo - 2) bazo
@@ -211,10 +212,12 @@ legiBazanVorton = Legilo f where
             Left (vorto <> " is not a valid base word")
       Nothing -> Left (vorto <> " is not a base word")
 
-legiFremdanVorton :: Legilo MalinflektaŜtupo
-legiFremdanVorton = Legilo f where
+legiSpecialanVorton :: Legilo MalinflektaŜtupo
+legiSpecialanVorton = Legilo f where
    f vorto | isUpper (head vorto) = Right (BazaŜtupo FremdaVorto, vorto)
-   f _ = Left "Cannot read FremdaVorto"
+   f vorto | ĉuTerminaCiferaVorto vorto = Right (BazaŜtupo TerminaCifero, vorto)
+   f vorto | ĉuNeterminaCiferaVorto vorto = Right (BazaŜtupo NeterminaCifero, vorto)
+   f vorto = Left ("Cannot read " <> vorto)
 
 malinflekti :: String -> Either String MalinflektitaVorto
 malinflekti vorto =
@@ -232,3 +235,52 @@ malinflekti vorto =
             _ -> undefined
       in
       MalinflektitaVorto {ŝtupoj=inflekcioj, bazaTipo=bazaŜtupo, bazaVorto=bazaVorto})
+   
+ĉuVerbo :: MalinflektitaVorto -> Bool
+ĉuVerbo vorto =
+   case bazaTipo vorto of
+      Verbo0 -> True
+      Verbo1 -> True
+      Verbo12 -> True
+      Verbo13 -> True
+      Verbo123 -> True
+      Verbo2 -> True
+      Verbo23 -> True
+      Verbo3 -> True
+      _ -> False
+
+ĉuTerminaCiferaVorto :: String -> Bool 
+ĉuTerminaCiferaVorto = \case
+   "mira" -> True
+   "pona" -> True
+   "vora" -> True
+   "nona" -> True
+   "tera" -> True
+   "sina" -> True
+   "lira" -> True
+   "sona" -> True
+   "kera" -> True
+   "gina" -> True
+   "trira" -> True
+   "plora" -> True
+   "klera" -> True
+   "plora" -> True
+   _ -> False
+
+ĉuNeterminaCiferaVorto :: String -> Bool 
+ĉuNeterminaCiferaVorto = \case
+   "mi" -> True
+   "po" -> True
+   "vo" -> True
+   "no" -> True
+   "te" -> True
+   "si" -> True
+   "li" -> True
+   "so" -> True
+   "ke" -> True
+   "gi" -> True
+   "di" -> True
+   "tri" -> True
+   "plo" -> True
+   "kle" -> True
+   _ -> False

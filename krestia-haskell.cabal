@@ -1,8 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.33.0.
 --
 -- see: https://github.com/sol/hpack
+--
+-- hash: 3560310413f5a401915bdf695a7eab45c2ac09ae5b707cc9bc5950b1aefd9be4
 
 name:           krestia-haskell
 version:        0.1.0.0
@@ -29,6 +31,7 @@ library
       Malinflektado
       Sintaksanalizilo
       Sintaksanalizilo.Fazo1
+      Vortaro
       Vorttipo
       Vorttraktado
   other-modules:
@@ -39,6 +42,7 @@ library
       base >=4.7 && <5
     , containers
     , mtl
+    , split
     , text
   default-language: Haskell2010
 
@@ -54,6 +58,7 @@ executable krestia-haskell-exe
     , containers
     , krestia-haskell
     , mtl
+    , split
     , text
   default-language: Haskell2010
 
@@ -76,5 +81,6 @@ test-suite krestia-haskell-test
     , hspec
     , krestia-haskell
     , mtl
+    , split
     , text
   default-language: Haskell2010
