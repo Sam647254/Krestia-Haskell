@@ -66,6 +66,7 @@ data Inflekcio
    | SolaFormo
    | FremdaVortoI
    | CiferoI
+   | Predikato
    deriving (Show, Eq)
 
 type Finaĵo = String
